@@ -12,6 +12,7 @@ export interface Education {
   startDate?: string;
   endDate?: string | null;
   isCurrent?: boolean;
+  academicLevel?: string;
   description?: string;
   highlights?: string[];
   achievements?: string[];
