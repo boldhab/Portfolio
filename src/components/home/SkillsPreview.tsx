@@ -12,8 +12,14 @@ export function SkillsPreview({
   if (!populated.length) return null;
 
   return (
-    <SectionWrapper withContainer={false} className="border-divider border-t">
-      <SectionHeading title="Technical Expertise" />
+    <SectionWrapper
+      id="technology"
+      aria-label="Technology"
+      tabIndex={-1}
+      withContainer={false}
+      className="border-divider border-t"
+    >
+      <SectionHeading title="Technology" />
       <div className="border-divider grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
         {populated.map((category) => (
           <div key={category.id} className="border-divider min-w-0 border-t pt-4">
