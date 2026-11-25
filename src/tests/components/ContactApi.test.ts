@@ -67,6 +67,37 @@ describe("Contact API Route Handler", () => {
     expect(data.message).toContain("maximum allowed size");
   });
 
+  it("counts UTF-8 bytes before parsing a body without a length header", async () => {
+    const response = await POST(createRequest({ message: "é".repeat(34 * 1024) }));
+    expect(response.status).toBe(413);
+  });
+
+  it("rejects request types other than JSON", async () => {
+    const response = await POST(
+      createRequest({}, { headers: { "content-type": "text/plain" } })
+    );
+    expect(response.status).toBe(415);
+  });
+
+  it("keeps Vercel contact delivery disabled while the firewall rule is unconfirmed", async () => {
+    vi.stubEnv("VERCEL", "1");
+    vi.stubEnv("CONTACT_WAF_CONFIGURED", "");
+    try {
+      const sendSpy = vi.spyOn(sendEmailModule, "sendContactEmail");
+      const response = await POST(
+        createRequest({
+          name: "Test Sender",
+          email: "sender@example.com",
+          message: "A controlled contact test.",
+        })
+      );
+      expect(response.status).toBe(503);
+      expect(sendSpy).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("validates fields and returns 400 with specific field errors", async () => {
     const req = createRequest({
       name: "A", // too short (min 2)
@@ -97,10 +128,10 @@ describe("Contact API Route Handler", () => {
 
     expect(response.status).toBe(503);
     expect(data.success).toBe(false);
-    expect(data.message).toContain("not configured");
+    expect(data.message).toContain("currently offline");
   });
 
-  it("safely accepts and discards honeypot bot submissions without emailing", async () => {
+  it("rejects honeypot bot submissions without emailing", async () => {
     const sendSpy = vi.spyOn(sendEmailModule, "sendContactEmail");
 
     const req = createRequest({
@@ -113,8 +144,8 @@ describe("Contact API Route Handler", () => {
     const response = await POST(req);
     const data = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(data.success).toBe(true);
+    expect(response.status).toBe(400);
+    expect(data.success).toBe(false);
     expect(sendSpy).not.toHaveBeenCalled();
   });
 
@@ -136,7 +167,7 @@ describe("Contact API Route Handler", () => {
 
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
-    expect(data.message).toContain("delivered successfully");
+    expect(data.message).toContain("accepted for delivery");
   });
 
   it("returns 500 when email provider dispatch fails", async () => {

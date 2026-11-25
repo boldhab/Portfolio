@@ -79,7 +79,7 @@ describe("ContactForm Component", () => {
       ok: true,
       json: async () => ({
         success: true,
-        message: "Your message has been delivered successfully.",
+        message: "Your message was accepted for delivery.",
       }),
     });
 
@@ -98,9 +98,9 @@ describe("ContactForm Component", () => {
 
     await user.click(screen.getByRole("button", { name: /send message/i }));
 
-    expect(await screen.findByText(/message delivered/i)).toBeInTheDocument();
+    expect(await screen.findByText(/message submitted/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/your message has been delivered successfully/i)
+      screen.getByText(/your message was accepted for delivery/i)
     ).toBeInTheDocument();
 
     // Verify form was reset
