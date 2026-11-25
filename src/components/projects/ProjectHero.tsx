@@ -70,7 +70,7 @@ export function ProjectHero({ project, className }: ProjectHeroProps) {
             src={cover.src}
             alt={cover.alt || project.title}
             fill
-            priority
+            preload
             className="object-cover"
             sizes="(min-width: 1200px) 1152px, 100vw"
           />

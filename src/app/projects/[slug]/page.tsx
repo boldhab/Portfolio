@@ -1,3 +1,4 @@
+import { ALL_PROJECTS_HREF } from "@/data/navigation";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { ProjectHero } from "@/components/projects/ProjectHero";
 import { ProjectMetadata } from "@/components/projects/ProjectMetadata";
 import { ProjectGallery } from "@/components/projects/ProjectGallery";
-import { RelatedProjects } from "@/components/projects/RelatedProjects";
 import { ProjectNavigation } from "@/components/projects/ProjectNavigation";
 import { CaseStudyLayout } from "@/components/case-study/CaseStudyLayout";
 import { ContactCTA } from "@/components/home/ContactCTA";
@@ -71,7 +71,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
             size="sm"
             className="text-muted-foreground hover:text-foreground -ml-3"
           >
-            <Link href="/projects" className="gap-2">
+            <Link href={ALL_PROJECTS_HREF} className="gap-2">
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               <span>Back to Projects</span>
             </Link>
@@ -110,11 +110,11 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
           )}
         </CaseStudyLayout>
 
-        {/* Screenshot Gallery (Omitted automatically if no screenshots exist) */}
-        <ProjectGallery screenshots={project.screenshots} />
-
-        {/* Related Projects */}
-        <RelatedProjects currentProject={project} />
+        {/* Screenshot Gallery (6 slots) */}
+        <ProjectGallery
+          screenshots={project.screenshots?.filter(({ src }) => hasPublicAsset(src))}
+          slotCount={6}
+        />
 
         {/* Previous / Next Project Navigation */}
         <ProjectNavigation currentSlug={project.slug} />

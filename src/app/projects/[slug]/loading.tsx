@@ -3,7 +3,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 export default function ProjectDetailsLoading() {
   return (
     <PageContainer>
-      <div className="animate-pulse space-y-8">
+      <div className="space-y-8 motion-safe:animate-pulse">
         {/* Back Link Skeleton */}
         <div className="bg-muted h-4 w-32 rounded" />
 

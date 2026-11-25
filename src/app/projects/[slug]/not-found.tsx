@@ -1,3 +1,4 @@
+import { ALL_PROJECTS_HREF } from "@/data/navigation";
 import Link from "next/link";
 import { ArrowLeft, FolderX, Grid } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -25,7 +26,7 @@ export default function ProjectNotFound() {
 
       <div className="flex flex-wrap items-center justify-center gap-4">
         <Button asChild size="lg">
-          <Link href="/projects" className="gap-2">
+          <Link href={ALL_PROJECTS_HREF} className="gap-2">
             <Grid className="h-4 w-4" />
             Browse All Projects
           </Link>

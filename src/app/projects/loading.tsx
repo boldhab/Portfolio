@@ -3,12 +3,15 @@ import { PageContainer } from "@/components/layout/PageContainer";
 export default function ProjectsLoading() {
   return (
     <PageContainer>
-      <div className="animate-pulse space-y-12">
-        {/* Header Skeleton */}
-        <div className="space-y-3">
-          <div className="bg-muted h-4 w-24 rounded font-mono" />
-          <div className="bg-muted h-10 w-72 rounded" />
-          <div className="bg-muted h-5 w-full max-w-xl rounded" />
+      <div className="space-y-12 motion-safe:animate-pulse">
+        {/* Back Button & Header Skeleton */}
+        <div className="space-y-6">
+          <div className="bg-muted h-11 w-32 rounded-md" />
+          <div className="space-y-3">
+            <div className="bg-muted h-4 w-24 rounded font-mono" />
+            <div className="bg-muted h-10 w-72 rounded" />
+            <div className="bg-muted h-5 w-full max-w-xl rounded" />
+          </div>
         </div>
 
         {/* Filters Skeleton */}
