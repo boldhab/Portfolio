@@ -8,20 +8,20 @@ export interface BiographyProps {
 export function Biography({ paragraphs }: BiographyProps) {
   return (
     <section aria-labelledby="biography-heading" className="space-y-4">
-      <div className="space-y-1">
-        <span className="text-muted-foreground font-mono text-xs tracking-wider uppercase">
+      <div className="space-y-2">
+        <span className="text-muted-foreground block font-mono text-xs tracking-widest uppercase">
           Background
         </span>
         <h2
           id="biography-heading"
-          className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl"
+          className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl"
         >
           Biography & Engineering Background
         </h2>
       </div>
 
       {paragraphs && paragraphs.length > 0 ? (
-        <div className="text-muted-foreground max-w-3xl space-y-4 text-base leading-relaxed sm:text-lg">
+        <div className="text-muted-foreground max-w-[65ch] space-y-4 text-base leading-7">
           {paragraphs.map((p, index) => (
             <p key={index}>{p}</p>
           ))}

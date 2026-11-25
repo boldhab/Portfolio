@@ -45,10 +45,12 @@ export function AboutHero({ profile }: AboutHeroProps) {
             <span>{profile.subtitle}</span>
           </span>
 
-          <span className="text-foreground inline-flex items-center gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>{profile.availability.badgeText || "Available for hire"}</span>
-          </span>
+          {profile.availability?.badgeText && (
+            <span className="text-foreground inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{profile.availability.badgeText}</span>
+            </span>
+          )}
         </div>
       </div>
 
@@ -60,9 +62,8 @@ export function AboutHero({ profile }: AboutHeroProps) {
               src={profile.avatar}
               alt={`Portrait photograph of ${profile.name}`}
               fill
-              sizes="(min-width: 1024px) 256px, 224px"
-              className="object-cover contrast-125 grayscale"
-              priority
+              sizes="(min-width: 1024px) 256px, (min-width: 640px) 224px, 192px"
+              className="object-cover"
             />
           </div>
         </div>
