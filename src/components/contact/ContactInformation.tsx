@@ -22,20 +22,22 @@ export function ContactInformation() {
       </div>
 
       {/* Availability Status */}
-      <div className="border-border bg-card space-y-2 rounded-lg border p-5">
-        <div className="text-foreground flex items-center gap-2 font-mono text-xs tracking-wider uppercase">
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
-          <span>Current Availability</span>
-        </div>
-        <p className="text-foreground text-sm font-medium">
-          {profileData.availability.badgeText || "Available for new opportunities"}
-        </p>
-        {profileData.availability.message && (
-          <p className="text-muted-foreground text-xs leading-relaxed">
-            {profileData.availability.message}
+      {profileData.availability?.badgeText ? (
+        <div className="border-border bg-card space-y-2 rounded-lg border p-5">
+          <div className="text-foreground flex items-center gap-2 font-mono text-xs tracking-wider uppercase">
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            <span>Current Availability</span>
+          </div>
+          <p className="text-foreground text-sm font-medium">
+            {profileData.availability.badgeText}
           </p>
-        )}
-      </div>
+          {profileData.availability.message && (
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              {profileData.availability.message}
+            </p>
+          )}
+        </div>
+      ) : null}
 
       {/* Direct Coordinates */}
       <div className="space-y-4">

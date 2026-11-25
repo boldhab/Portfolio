@@ -23,7 +23,7 @@ export function ContactCTA() {
           size="lg"
           className="bg-background text-foreground focus-visible:ring-background h-12 px-5 shadow-none"
         >
-          <Link href="/contact">Get in Touch</Link>
+          <Link href="/#contact">Get in Touch</Link>
         </Button>
       </div>
     </SectionWrapper>

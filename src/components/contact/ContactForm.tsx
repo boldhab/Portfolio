@@ -94,7 +94,7 @@ export function ContactForm() {
         >
           <CheckCircle2 className="text-foreground mt-0.5 h-5 w-5 shrink-0" />
           <div className="space-y-1">
-            <p className="font-semibold">Message Delivered</p>
+            <p className="font-semibold">Message Submitted</p>
             <p className="text-muted-foreground">{statusMessage}</p>
           </div>
         </div>
