@@ -94,7 +94,7 @@ describe("Experience Components & Data Logic", () => {
       ).toBeInTheDocument();
 
       // Filter tabs
-      const internshipTab = screen.getByRole("tab", { name: /internship/i });
+      const internshipTab = screen.getByRole("button", { name: /internship/i });
       expect(internshipTab).toBeInTheDocument();
 
       await user.click(internshipTab);

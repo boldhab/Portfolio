@@ -43,8 +43,8 @@ describe("About Page Components", () => {
     });
 
     it("renders portrait only when asset exists on disk", () => {
-      vi.spyOn(publicAssetModule, "hasPublicAsset").mockImplementation(
-        (path) => (path ? path.includes("avatar.png") : false)
+      vi.spyOn(publicAssetModule, "hasPublicAsset").mockImplementation((path) =>
+        path ? path.includes("avatar.png") : false
       );
 
       const { rerender } = render(<AboutHero profile={mockProfile} />);
@@ -118,10 +118,39 @@ describe("About Page Components", () => {
     it("renders education records with degree, institution, and highlights", () => {
       render(<EducationSection education={mockEducation} />);
 
+      expect(
+        screen.getByRole("heading", { level: 2, name: "Education." })
+      ).toBeInTheDocument();
       expect(screen.getByText("B.Sc. in Computer Science")).toBeInTheDocument();
       expect(screen.getByText("Addis Ababa University")).toBeInTheDocument();
       expect(screen.getByText(/2019 — 2023/)).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 4, name: "Relevant Coursework" })
+      ).toBeInTheDocument();
       expect(screen.getByText("Dean's List")).toBeInTheDocument();
+    });
+
+    it("renders academic level and in-progress status when dates are omitted", () => {
+      render(
+        <EducationSection
+          education={[
+            {
+              id: "edu-current",
+              institution: "Debre Birhan University",
+              program: "Software Engineering",
+              degree: "Bachelor of Science (B.Sc.)",
+              location: "Debre Birhan, Ethiopia",
+              isCurrent: true,
+              academicLevel: "Fourth-year undergraduate",
+              highlights: ["Software Architecture"],
+            },
+          ]}
+        />
+      );
+
+      expect(screen.getByText("Fourth-year undergraduate · In progress")).toBeVisible();
+      expect(screen.getByText("Debre Birhan, Ethiopia")).toBeVisible();
+      expect(screen.getByText("Software Architecture")).toBeVisible();
     });
 
     it("returns null when education dataset is empty", () => {
@@ -186,7 +215,7 @@ describe("About Page Components", () => {
       ).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /request cv/i })).toHaveAttribute(
         "href",
-        "/contact"
+        "/#contact"
       );
     });
   });
