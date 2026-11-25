@@ -10,9 +10,13 @@ export function ExperienceItem({ experience }: ExperienceItemProps) {
   const roleTitle = experience.role || experience.position || "Software Engineer";
   const typeLabel = (experience.type || "employment").toUpperCase();
   const isCurrent = experience.isCurrent ?? !experience.endDate;
-  const dateRange = `${experience.startDate || "Date TBD"} — ${
-    isCurrent ? "Present" : experience.endDate || "Present"
-  }`;
+  const dateRange = experience.startDate
+    ? `${experience.startDate} — ${isCurrent ? "Present" : experience.endDate || "Present"}`
+    : experience.endDate
+      ? experience.endDate
+      : isCurrent
+        ? "Present"
+        : "Duration pending confirmation";
 
   return (
     <article

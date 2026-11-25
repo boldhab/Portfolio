@@ -46,7 +46,7 @@ export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
       {/* Category Filter Tabs (displayed only if multiple types exist) */}
       {availableTypes.length > 1 && (
         <div
-          role="tablist"
+          role="group"
           aria-label="Filter career history by experience type"
           className="border-border flex flex-wrap items-center gap-2 border-b pb-4"
         >
@@ -54,8 +54,7 @@ export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
             variant={selectedType === "all" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedType("all")}
-            role="tab"
-            aria-selected={selectedType === "all"}
+            aria-pressed={selectedType === "all"}
             className="font-mono text-xs tracking-wider uppercase"
           >
             All Positions ({experiences.length})
@@ -70,8 +69,7 @@ export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
                 variant={isSelected ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedType(type)}
-                role="tab"
-                aria-selected={isSelected}
+                aria-pressed={isSelected}
                 className="font-mono text-xs tracking-wider uppercase"
               >
                 {type} ({count})

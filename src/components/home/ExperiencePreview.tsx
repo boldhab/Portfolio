@@ -67,7 +67,7 @@ export function ExperiencePreview({
           )}
       </ul>
       <Button asChild variant="secondary" className="mt-6 h-11">
-        <Link href="/experience">View experience</Link>
+        <Link href="/#experience">View experience</Link>
       </Button>
     </SectionWrapper>
   );
