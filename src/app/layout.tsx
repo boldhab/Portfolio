@@ -9,7 +9,7 @@ import { constructMetadata } from "@/lib/metadata";
 import { SITE_CONFIG } from "@/lib/constants";
 import { profileData } from "@/data/profile";
 
-export const metadata: Metadata = constructMetadata();
+export const metadata: Metadata = constructMetadata({ noIndex: true });
 
 export const viewport: Viewport = {
   themeColor: [
@@ -57,18 +57,22 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} scroll-pt-16 motion-safe:scroll-smooth`}
     >
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        {SITE_CONFIG.canonicalOrigin && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+            }}
+          />
+        )}
       </head>
       <body className="bg-background text-foreground selection:bg-foreground selection:text-background flex min-h-screen flex-col antialiased">
         <a
           href="#main-content"
-          className="bg-background text-foreground border-border focus:ring-ring sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:border focus:p-4 focus:outline-none focus:ring-2"
+          className="bg-background text-foreground border-border focus:ring-ring sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:border focus:p-4 focus:ring-2 focus:outline-none"
         >
           Skip to main content
         </a>

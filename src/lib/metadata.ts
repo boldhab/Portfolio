@@ -25,9 +25,9 @@ export function constructMetadata({
 
   const metadataBase = new URL(SITE_CONFIG.url);
   const url = new URL(path || "/", metadataBase).href;
-  const hasProductionUrl = !["localhost", "127.0.0.1", "[::1]"].includes(
-    metadataBase.hostname
-  );
+  const imageUrl = image ? new URL(image, metadataBase).href : null;
+  const isDefaultSocialImage = image === SITE_CONFIG.ogImage;
+  const indexable = Boolean(SITE_CONFIG.canonicalOrigin) && !noIndex;
 
   return {
     title: pageTitle,
@@ -36,35 +36,36 @@ export function constructMetadata({
     creator: SITE_CONFIG.name,
     metadataBase,
     alternates: {
-      canonical: hasProductionUrl ? url : null,
+      canonical: indexable ? url : null,
     },
     openGraph: {
       type: "website",
       locale: "en_US",
-      url: hasProductionUrl ? url : undefined,
+      url: noIndex ? undefined : url,
       title: pageTitle,
       description,
       siteName: SITE_CONFIG.name,
-      images: image
+      images: imageUrl
         ? [
             {
-              url: image,
-              width: 1200,
-              height: 630,
+              url: imageUrl,
               alt: pageTitle,
+              ...(isDefaultSocialImage
+                ? { width: 1200, height: 630, type: "image/png" }
+                : {}),
             },
           ]
         : [],
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: imageUrl ? "summary_large_image" : "summary",
       title: pageTitle,
       description,
-      images: image ? [image] : [],
+      images: imageUrl ? [imageUrl] : [],
     },
     robots: {
-      index: !noIndex,
-      follow: !noIndex,
+      index: indexable,
+      follow: indexable,
     },
     icons: {
       icon: "/favicon.ico",
