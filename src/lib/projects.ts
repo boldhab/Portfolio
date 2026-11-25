@@ -1,3 +1,4 @@
+import { isHttpUrl } from "@/lib/utils";
 import { Project } from "@/types";
 import { projects } from "@/data/projects";
 
@@ -78,11 +79,11 @@ export function validateProject(project: Project): { valid: boolean; errors: str
     errors.push("Project technologies must be an array");
   }
 
-  if (project.githubUrl && !/^https?:\/\//i.test(project.githubUrl)) {
+  if (project.githubUrl && !isHttpUrl(project.githubUrl)) {
     errors.push(`Invalid githubUrl scheme: "${project.githubUrl}"`);
   }
 
-  if (project.liveUrl && !/^https?:\/\//i.test(project.liveUrl)) {
+  if (project.liveUrl && !isHttpUrl(project.liveUrl)) {
     errors.push(`Invalid liveUrl scheme: "${project.liveUrl}"`);
   }
 
