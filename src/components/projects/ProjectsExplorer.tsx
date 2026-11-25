@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { SlidersHorizontal, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { ALL_PROJECTS_HREF } from "@/data/navigation";
 import { Project } from "@/types";
 import { CategoryMeta, filterProjects, normalizeCategorySlug } from "@/lib/projects";
 import { ProjectFilters } from "./ProjectFilters";
@@ -14,13 +15,13 @@ import { Button } from "@/components/ui/button";
 export interface ProjectsExplorerProps {
   initialProjects: Project[];
   categories: CategoryMeta[];
-  technologies?: string[];
+  availableCovers?: string[];
 }
 
 export function ProjectsExplorer({
   initialProjects,
   categories,
-  technologies = [],
+  availableCovers = [],
 }: ProjectsExplorerProps) {
   const searchParams = useSearchParams();
 
@@ -70,7 +71,9 @@ export function ProjectsExplorer({
       }
 
       const queryString = params.toString();
-      const newUrl = queryString ? `/projects?${queryString}` : "/projects";
+      const newUrl = queryString
+        ? `${ALL_PROJECTS_HREF}?${queryString}`
+        : ALL_PROJECTS_HREF;
       if (isPush) {
         window.history.pushState(null, "", newUrl);
       } else {
@@ -90,16 +93,11 @@ export function ProjectsExplorer({
     updateUrl(selectedCategory, query, selectedTech, false);
   };
 
-  const handleTechChange = (tech: string) => {
-    setSelectedTech(tech);
-    updateUrl(selectedCategory, searchQuery, tech, true);
-  };
-
   const handleResetFilters = () => {
     setSelectedCategory("all");
     setSearchQuery("");
     setSelectedTech("all");
-    window.history.pushState(null, "", "/projects");
+    window.history.pushState(null, "", ALL_PROJECTS_HREF);
   };
 
   // Filter projects based on current selections
@@ -146,48 +144,10 @@ export function ProjectsExplorer({
           <ProjectSearch value={searchQuery} onChange={handleSearchChange} />
         </div>
 
-        {/* Optional Technology Filter Row */}
-        {technologies.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 pt-2 font-mono text-xs">
-            <span className="text-muted-foreground mr-1 flex items-center gap-1">
-              <SlidersHorizontal className="h-3 w-3" />
-              Stack:
-            </span>
-            <button
-              type="button"
-              onClick={() => handleTechChange("all")}
-              className={`rounded border px-2 py-0.5 transition-colors ${
-                selectedTech === "all"
-                  ? "border-foreground bg-foreground text-background font-semibold"
-                  : "border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              All
-            </button>
-            {technologies.map((tech) => {
-              const isSelected = selectedTech.toLowerCase() === tech.toLowerCase();
-              return (
-                <button
-                  key={tech}
-                  type="button"
-                  onClick={() => handleTechChange(isSelected ? "all" : tech)}
-                  className={`rounded border px-2 py-0.5 transition-colors ${
-                    isSelected
-                      ? "border-foreground bg-foreground text-background font-semibold"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tech}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
         {/* Active Filters Summary & Reset */}
         {isFiltering && (
           <div className="text-muted-foreground flex items-center justify-between pt-2 font-mono text-xs">
-            <span>
+            <span role="status">
               Showing {filteredProjects.length} of {initialProjects.length} projects
             </span>
             <Button
@@ -206,27 +166,29 @@ export function ProjectsExplorer({
       {/* Featured Projects Highlight (When on default view and featured projects exist) */}
       {!isFiltering && featuredProjects.length > 0 && (
         <section aria-labelledby="featured-projects-heading" className="space-y-6">
-          <div className="space-y-1">
-            <span className="text-muted-foreground font-mono text-xs tracking-wider uppercase">
-              Curated Work
-            </span>
-            <h2
-              id="featured-projects-heading"
-              className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl"
-            >
-              Featured Case Studies
-            </h2>
-          </div>
+          <h2
+            id="featured-projects-heading"
+            className="text-foreground text-2xl font-bold tracking-tight sm:text-3xl"
+          >
+            Featured Projects
+          </h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
             {featuredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} featured />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                coverAvailable={availableCovers.includes(
+                  project.coverImage?.src ?? project.image ?? ""
+                )}
+                featured
+              />
             ))}
           </div>
         </section>
       )}
 
       {/* All / Filtered Projects Grid */}
-      <section aria-labelledby="all-projects-heading" className="space-y-6">
+      <section aria-label="Project results" className="space-y-6">
         {!isFiltering && featuredProjects.length > 0 && regularProjects.length > 0 && (
           <div className="border-border space-y-1 border-t pt-6">
             <span className="text-muted-foreground font-mono text-xs tracking-wider uppercase">
@@ -243,6 +205,7 @@ export function ProjectsExplorer({
 
         <div id="projects-grid">
           <ProjectGrid
+            availableCovers={availableCovers}
             projects={isFiltering ? filteredProjects : regularProjects}
             emptyTitle={
               isFiltering ? "No matching projects" : "No projects published yet"

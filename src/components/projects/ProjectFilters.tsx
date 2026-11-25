@@ -40,7 +40,7 @@ export function ProjectFilters({
   return (
     <div
       className={cn("flex flex-wrap items-center gap-2", className)}
-      role="tablist"
+      role="group"
       aria-label="Filter projects by engineering domain"
     >
       {normalizedList.map(({ slug, label }) => {
@@ -54,8 +54,7 @@ export function ProjectFilters({
             variant={isSelected ? "default" : "outline"}
             size="sm"
             onClick={() => onSelectCategory(slug)}
-            role="tab"
-            aria-selected={isSelected}
+            aria-pressed={isSelected}
             aria-controls="projects-grid"
             className="font-mono text-xs tracking-wider uppercase"
           >
