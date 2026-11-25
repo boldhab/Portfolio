@@ -39,23 +39,23 @@ export async function sendContactEmail(
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: toEmail,
-      replyTo: `${params.name} <${params.email}>`,
-      subject: `Portfolio Inquiry from ${params.name}`,
+      replyTo: params.email,
+      subject: "Portfolio inquiry",
       text: `Name: ${params.name}\nEmail: ${params.email}\n\nMessage:\n${params.message}`,
     });
 
-    if (error) {
+    if (error || !data?.id) {
       return {
         success: false,
         status: "error",
-        error: error.message,
+        error: error?.message ?? "Provider did not return a message ID",
       };
     }
 
     return {
       success: true,
       status: "sent",
-      id: data?.id,
+      id: data.id,
     };
   } catch (err: unknown) {
     const message =

@@ -8,37 +8,45 @@ const MAX_PAYLOAD_BYTES = 64 * 1024; // 64 KB limit
 
 export async function POST(req: NextRequest): Promise<NextResponse<ContactApiResponse>> {
   try {
-    // 1. Enforce payload size limits
-    const contentLength = req.headers.get("content-length");
-    if (contentLength && parseInt(contentLength, 10) > MAX_PAYLOAD_BYTES) {
+    if (
+      req.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !==
+      "application/json"
+    ) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Request payload exceeds maximum allowed size (64KB).",
-        },
-        { status: 413 }
+        { success: false, message: "Submit the form as JSON." },
+        { status: 415 }
       );
     }
 
-    // 2. Safe JSON parsing
-    let bodyText: string;
+    const reader = req.body?.getReader();
+    const decoder = new TextDecoder("utf-8", { fatal: true });
+    let bodyText = "";
+    let bytes = 0;
     try {
-      bodyText = await req.text();
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+        if (bytes > MAX_PAYLOAD_BYTES) {
+          void reader.cancel().catch(() => {});
+          return NextResponse.json(
+            {
+              success: false,
+              message: "Request payload exceeds maximum allowed size (64KB).",
+            },
+            { status: 413 }
+          );
+        }
+        bodyText += decoder.decode(value, { stream: true });
+      }
+      bodyText += decoder.decode();
     } catch {
       return NextResponse.json(
         { success: false, message: "Unable to read request stream." },
         { status: 400 }
       );
-    }
-
-    if (bodyText.length > MAX_PAYLOAD_BYTES) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Request payload exceeds maximum allowed size (64KB).",
-        },
-        { status: 413 }
-      );
+    } finally {
+      reader?.releaseLock();
     }
 
     let parsedJson: unknown;
@@ -69,13 +77,23 @@ export async function POST(req: NextRequest): Promise<NextResponse<ContactApiRes
 
     // 4. Honeypot spam defense
     if (botcheck) {
-      // Silently discard bot submission with generic success response
+      // Discard before any provider call.
       return NextResponse.json(
         {
-          success: true,
-          message: "Thank you for your message.",
+          success: false,
+          message: "Unable to accept this submission.",
         },
-        { status: 200 }
+        { status: 400 }
+      );
+    }
+
+    if (process.env.VERCEL === "1" && process.env.CONTACT_WAF_CONFIGURED !== "true") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "The contact messaging service is currently offline.",
+        },
+        { status: 503 }
       );
     }
 
@@ -110,13 +128,14 @@ export async function POST(req: NextRequest): Promise<NextResponse<ContactApiRes
         {
           success: false,
           message:
-            "The contact messaging service is currently offline because email credentials are not configured by the portfolio owner. Please reach out via direct social links.",
+            "The contact messaging service is currently offline. Please reach out via direct social links.",
         },
         { status: 503 }
       );
     }
 
     if (!emailResult.success) {
+      console.error("Contact email provider rejected submission");
       return NextResponse.json(
         {
           success: false,
@@ -130,15 +149,12 @@ export async function POST(req: NextRequest): Promise<NextResponse<ContactApiRes
     return NextResponse.json(
       {
         success: true,
-        message:
-          "Your message has been delivered successfully. Thank you for reaching out!",
+        message: "Your message was accepted for delivery. Thank you for reaching out!",
       },
       { status: 200 }
     );
-  } catch (err: unknown) {
-    const errorMsg =
-      err instanceof Error ? err.message : "Internal unexpected error occurred.";
-    console.error("Contact API Handler Error:", errorMsg);
+  } catch {
+    console.error("Unexpected contact handler failure");
 
     return NextResponse.json(
       {
@@ -156,6 +172,6 @@ export async function GET(): Promise<NextResponse<ContactApiResponse>> {
       success: false,
       message: "Method Not Allowed. Submissions must be sent via POST.",
     },
-    { status: 405 }
+    { status: 405, headers: { Allow: "POST" } }
   );
 }
