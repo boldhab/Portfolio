@@ -1,3 +1,5 @@
+import { ALL_PROJECTS_HREF } from "@/data/navigation";
+import { isHttpUrl } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { SectionWrapper } from "@/components/shared/SectionWrapper";
@@ -26,22 +28,29 @@ export function Hero({ profile = profileData }: { profile?: Profile }) {
           <h1 className="max-w-[15ch] text-[clamp(2.65rem,9vw,7rem)] leading-[0.95] font-semibold tracking-[-0.075em] [overflow-wrap:anywhere]">
             {profile.name}
           </h1>
-          <p className="mt-7 text-2xl font-medium tracking-tight sm:text-3xl lg:text-4xl">
-            {profile.title}
-          </p>
-          <p className="text-muted-foreground mt-3 max-w-xl text-base leading-relaxed sm:text-lg">
-            {profile.subtitle}
-          </p>
+          <div className="mt-7 space-y-2">
+            <p className="text-2xl font-medium tracking-tight sm:text-3xl lg:text-4xl">
+              {profile.headline || profile.title}
+            </p>
+            <p className="text-foreground/80 font-mono text-sm tracking-wider uppercase sm:text-base">
+              {profile.title}
+            </p>
+          </div>
+          <div className="text-muted-foreground mt-4 max-w-xl space-y-2 text-base leading-relaxed sm:text-lg">
+            <p className="font-medium text-foreground/90">{profile.subtitle}</p>
+            {profile.shortIntro && (
+              <p className="text-sm leading-relaxed sm:text-base">{profile.shortIntro}</p>
+            )}
+          </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" className="h-12 px-5 shadow-none">
-              <Link href="/projects">View Projects</Link>
+              <Link href={ALL_PROJECTS_HREF}>View Projects</Link>
             </Button>
             <Button asChild variant="secondary" size="lg" className="h-12 px-5">
-              <Link href="/contact">Contact Me</Link>
+              <Link href="/#contact">Contact Me</Link>
             </Button>
             {profile.resumeUrl &&
-              (hasPublicAsset(profile.resumeUrl) ||
-                /^https?:\/\//i.test(profile.resumeUrl)) && (
+              (hasPublicAsset(profile.resumeUrl) || isHttpUrl(profile.resumeUrl)) && (
                 <Button asChild variant="ghost" size="lg" className="h-12 px-5">
                   <Link href={profile.resumeUrl}>Résumé</Link>
                 </Button>
