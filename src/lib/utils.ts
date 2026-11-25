@@ -20,3 +20,13 @@ export function formatDate(dateString: string): string {
     year: "numeric",
   }).format(date);
 }
+
+export function isHttpUrl(value?: string): value is string {
+  if (!value || !/^https?:\/\//i.test(value.trim())) return false;
+  try {
+    const url = new URL(value);
+    return Boolean(url.hostname) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
