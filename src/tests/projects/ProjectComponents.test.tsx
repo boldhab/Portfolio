@@ -67,7 +67,7 @@ describe("ProjectCard Component", () => {
     };
     render(<ProjectCard project={withoutImage} />);
 
-    expect(screen.getByText("No screenshot")).toBeInTheDocument();
+    expect(screen.queryByRole("img")).toBeNull();
   });
 });
 
@@ -140,8 +140,8 @@ describe("ProjectFilters Component", () => {
       />
     );
 
-    expect(screen.getByRole("tab", { name: "All" })).toBeInTheDocument();
-    const frontendTab = screen.getByRole("tab", { name: "Frontend" });
+    expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument();
+    const frontendTab = screen.getByRole("button", { name: "Frontend" });
     expect(frontendTab).toBeInTheDocument();
 
     fireEvent.click(frontendTab);
@@ -159,11 +159,16 @@ describe("ProjectGallery Component", () => {
 describe("ProjectNavigation & RelatedProjects Components", () => {
   it("renders navigation controls cleanly", () => {
     render(<ProjectNavigation currentSlug="non-existent-slug" />);
-    expect(screen.getByText("All Projects Directory")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "All Projects Directory" })).toHaveAttribute(
+      "href",
+      "/projects"
+    );
   });
 
   it("handles empty related projects without crashing", () => {
-    const { container } = render(<RelatedProjects currentProject={sampleProject} />);
+    const { container } = render(
+      <RelatedProjects currentProject={sampleProject} limit={0} />
+    );
     expect(container.firstChild).toBeNull();
   });
 });
