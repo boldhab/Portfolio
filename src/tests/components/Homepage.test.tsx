@@ -51,24 +51,36 @@ describe("Homepage sections", () => {
     );
     expect(screen.getByRole("link", { name: "Contact Me" })).toHaveAttribute(
       "href",
-      "/contact"
+      "/#contact"
     );
     expect(screen.queryByRole("img")).toBeNull();
     expect(screen.queryByRole("link", { name: "Résumé" })).toBeNull();
   });
 
-  it("displays only featured projects and links to the directory", () => {
-    projects.splice(0, projects.length, fixture, {
-      ...fixture,
-      id: "unfeatured",
-      title: "Unfeatured fixture",
-      featured: false,
-    });
+  it("displays at most 4 featured projects and links to the directory", () => {
+    projects.splice(
+      0,
+      projects.length,
+      fixture,
+      { ...fixture, id: "f2", slug: "f2", title: "Featured 2", featured: true },
+      { ...fixture, id: "f3", slug: "f3", title: "Featured 3", featured: true },
+      { ...fixture, id: "f4", slug: "f4", title: "Featured 4", featured: true },
+      { ...fixture, id: "f5", slug: "f5", title: "Featured 5", featured: true },
+      {
+        ...fixture,
+        id: "unfeatured",
+        slug: "unfeatured",
+        title: "Unfeatured fixture",
+        featured: false,
+      }
+    );
     render(<FeaturedProjects />);
+    expect(screen.getAllByRole("article")).toHaveLength(4);
     expect(screen.getByRole("link", { name: fixture.title })).toHaveAttribute(
       "href",
       "/projects/fixture"
     );
+    expect(screen.queryByText("Featured 5")).toBeNull();
     expect(screen.queryByText("Unfeatured fixture")).toBeNull();
     expect(screen.getByRole("link", { name: "View all projects" })).toHaveAttribute(
       "href",
@@ -85,22 +97,22 @@ describe("Homepage sections", () => {
   it("handles a missing screenshot and omits missing links", () => {
     render(<ProjectCard project={{ ...fixture, githubUrl: " " }} />);
     expect(screen.queryByRole("img")).toBeNull();
-    expect(screen.getByText("No screenshot")).toBeVisible();
-    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.queryByRole("link", { name: /source code/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /live demo/i })).toBeNull();
+    expect(
+      screen.getByRole("link", { name: `View details for ${fixture.title}` })
+    ).toHaveAttribute("href", `/projects/${fixture.slug}`);
   });
 
   it("renders owner-configured images and external URLs", () => {
-    render(
-      <ProjectCard
-        project={{
-          ...fixture,
-          image: "/window.svg",
-          imageAlt: "Example application window",
-          githubUrl: "https://example.com/source",
-          liveUrl: "https://example.com/demo",
-        }}
-      />
-    );
+    projects.splice(0, projects.length, {
+      ...fixture,
+      image: "/window.svg",
+      imageAlt: "Example application window",
+      githubUrl: "https://example.com/source",
+      liveUrl: "https://example.com/demo",
+    });
+    render(<FeaturedProjects />);
     expect(screen.getByRole("img", { name: "Example application window" })).toBeVisible();
     expect(screen.getByRole("link", { name: /source code/i })).toHaveAttribute(
       "href",
@@ -161,7 +173,7 @@ describe("Homepage sections", () => {
     expect(screen.queryByText(/Present/)).toBeNull();
     expect(screen.getByRole("link", { name: "View experience" })).toHaveAttribute(
       "href",
-      "/experience"
+      "/#experience"
     );
   });
 
@@ -174,11 +186,11 @@ describe("Homepage sections", () => {
     );
     expect(screen.getByRole("link", { name: "Read more about me" })).toHaveAttribute(
       "href",
-      "/about"
+      "/#about"
     );
     expect(screen.getByRole("link", { name: "Get in Touch" })).toHaveAttribute(
       "href",
-      "/contact"
+      "/#contact"
     );
   });
 });

@@ -27,20 +27,30 @@ describe("Navbar Component", () => {
 
     const desktopNav = screen.getByLabelText("Main Navigation");
     expect(desktopNav).toBeInTheDocument();
+    expect(
+      Array.from(desktopNav.querySelectorAll("a"), (link) => link.textContent)
+    ).toEqual(["Home", "Experience", "Technology", "Projects", "About", "Contact"]);
 
     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Projects" })).toHaveAttribute(
       "href",
-      "/projects"
+      "/#projects"
     );
-    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute(
+      "href",
+      "/#about"
+    );
     expect(screen.getByRole("link", { name: "Experience" })).toHaveAttribute(
       "href",
-      "/experience"
+      "/#experience"
+    );
+    expect(screen.getByRole("link", { name: "Technology" })).toHaveAttribute(
+      "href",
+      "/#technology"
     );
     expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute(
       "href",
-      "/contact"
+      "/#contact"
     );
   });
 });
