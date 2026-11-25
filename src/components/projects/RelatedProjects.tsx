@@ -1,3 +1,4 @@
+import { hasPublicAsset } from "@/lib/public-asset";
 import * as React from "react";
 import { Project } from "@/types";
 import { getRelatedProjects } from "@/lib/projects";
@@ -34,7 +35,11 @@ export function RelatedProjects({
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {related.map((project) => (
-          <ProjectCard key={project.id} project={project} />
+          <ProjectCard
+            key={project.id}
+            project={project}
+            coverAvailable={hasPublicAsset(project.coverImage?.src ?? project.image)}
+          />
         ))}
       </div>
     </section>

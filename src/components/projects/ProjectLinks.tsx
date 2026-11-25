@@ -3,7 +3,7 @@ import { ExternalLink } from "lucide-react";
 import { GithubIcon } from "@/components/shared/Icons";
 import { Button } from "@/components/ui/button";
 import { Project } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, isHttpUrl } from "@/lib/utils";
 
 export interface ProjectLinksProps {
   project: Project;
@@ -16,13 +16,12 @@ export function ProjectLinks({
   size = "default",
   className,
 }: ProjectLinksProps) {
-  const hasGithub = Boolean(project.githubUrl && project.githubUrl.trim());
-  const hasLive = Boolean(project.liveUrl && project.liveUrl.trim());
-  const hasAdditional = Boolean(
-    project.additionalLinks && project.additionalLinks.length > 0
-  );
+  const hasGithub = isHttpUrl(project.githubUrl);
+  const hasLive = isHttpUrl(project.liveUrl);
+  const additionalLinks =
+    project.additionalLinks?.filter((link) => isHttpUrl(link.url)) ?? [];
 
-  if (!hasGithub && !hasLive && !hasAdditional) {
+  if (!hasGithub && !hasLive && additionalLinks.length === 0) {
     return null;
   }
 
@@ -58,21 +57,20 @@ export function ProjectLinks({
         </Button>
       )}
 
-      {hasAdditional &&
-        project.additionalLinks?.map((link, idx) => (
-          <Button key={idx} asChild variant="outline" size={size}>
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${link.label} for ${project.title}`}
-              className="inline-flex items-center gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
-              <span>{link.label}</span>
-            </a>
-          </Button>
-        ))}
+      {additionalLinks.map((link, idx) => (
+        <Button key={idx} asChild variant="outline" size={size}>
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${link.label} for ${project.title}`}
+            className="inline-flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span>{link.label}</span>
+          </a>
+        </Button>
+      ))}
     </div>
   );
 }
