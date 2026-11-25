@@ -9,6 +9,7 @@ export interface ProjectGridProps {
   emptyTitle?: string;
   emptyDescription?: string;
   className?: string;
+  availableCovers?: string[];
 }
 
 export function ProjectGrid({
@@ -16,6 +17,7 @@ export function ProjectGrid({
   emptyTitle = "No projects found",
   emptyDescription = "No project case studies match the current criteria. Try resetting filters or exploring other categories.",
   className,
+  availableCovers = [],
 }: ProjectGridProps) {
   if (projects.length === 0) {
     return (
@@ -30,7 +32,13 @@ export function ProjectGrid({
       aria-label="Projects grid"
     >
       {projects.map((project) => (
-        <ProjectCard key={project.id} project={project} />
+        <ProjectCard
+          key={project.id}
+          project={project}
+          coverAvailable={availableCovers.includes(
+            project.coverImage?.src ?? project.image ?? ""
+          )}
+        />
       ))}
     </div>
   );

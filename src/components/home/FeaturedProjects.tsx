@@ -1,26 +1,32 @@
+import { hasPublicAsset } from "@/lib/public-asset";
 import Link from "next/link";
 import { ProjectCard } from "@/components/projects/ProjectCard";
-import { SectionHeading } from "@/components/shared/SectionHeading";
-import { SectionWrapper } from "@/components/shared/SectionWrapper";
 import { Button } from "@/components/ui/button";
 import { getFeaturedProjects } from "@/data/projects";
+import { ALL_PROJECTS_HREF } from "@/data/navigation";
 
 export function FeaturedProjects() {
-  const featured = getFeaturedProjects();
+  const featured = getFeaturedProjects().slice(0, 4);
 
   return (
-    <SectionWrapper withContainer={false} className="border-divider border-t">
-      <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-        <SectionHeading title="Featured Projects" className="mb-0 md:mb-0" />
-        <Button asChild variant="ghost" className="-ml-4 h-11 sm:ml-0">
-          <Link href="/projects">View all projects</Link>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-muted-foreground font-mono text-xs tracking-wider uppercase">
+          Featured Highlights
+        </p>
+        <Button asChild variant="outline" size="sm" className="h-9">
+          <Link href={ALL_PROJECTS_HREF}>View all projects</Link>
         </Button>
       </div>
 
       {featured.length ? (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           {featured.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard
+              key={project.id}
+              project={project}
+              coverAvailable={hasPublicAsset(project.coverImage?.src ?? project.image)}
+            />
           ))}
         </div>
       ) : (
@@ -28,6 +34,6 @@ export function FeaturedProjects() {
           No featured projects yet.
         </p>
       )}
-    </SectionWrapper>
+    </div>
   );
 }
