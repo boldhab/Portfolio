@@ -19,26 +19,30 @@ test.describe("Projects Showcase & Case Study System", () => {
     });
 
     await page.goto("/projects");
-    await expect(page).toHaveTitle(/Projects/);
+    await expect(page).toHaveURL(/\/projects$/);
 
     const main = page.getByRole("main");
     await expect(
-      main.getByRole("heading", { level: 1, name: "Engineering Projects" })
+      main.getByRole("heading", { level: 1, name: "Engineering Projects", exact: true })
     ).toBeVisible();
+    await expect(main.getByRole("link", { name: "Back to Main" })).toHaveAttribute(
+      "href",
+      "/"
+    );
 
     // Verify search input
     const searchInput = page.getByRole("textbox", { name: "Search projects" });
     await expect(searchInput).toBeVisible();
 
     // Verify filter tablist
-    const tablist = page.getByRole("tablist", {
+    const tablist = page.getByRole("group", {
       name: "Filter projects by engineering domain",
     });
     await expect(tablist).toBeVisible();
 
     // Verify "All" tab is active by default
-    const allTab = tablist.getByRole("tab", { name: /^all/i });
-    await expect(allTab).toHaveAttribute("aria-selected", "true");
+    const allTab = tablist.getByRole("button", { name: /^all/i });
+    await expect(allTab).toHaveAttribute("aria-pressed", "true");
 
     // Run axe accessibility audit
     await page.addScriptTag({ path: axeScript });
@@ -61,21 +65,21 @@ test.describe("Projects Showcase & Case Study System", () => {
     page,
   }) => {
     await page.goto("/projects");
-    const tablist = page.getByRole("tablist", {
+    const tablist = page.getByRole("group", {
       name: "Filter projects by engineering domain",
     });
-    const tabs = await tablist.getByRole("tab").all();
+    const tabs = await tablist.getByRole("button").all();
 
     // If category tabs exist beyond "All", click the first category
     if (tabs.length > 1) {
       const targetTab = tabs[1];
       await targetTab.click();
-      await expect(targetTab).toHaveAttribute("aria-selected", "true");
+      await expect(targetTab).toHaveAttribute("aria-pressed", "true");
       await expect(page).toHaveURL(/category=/);
     } else {
       // With empty initial dataset, only "All" is present
-      const allTab = tablist.getByRole("tab", { name: /^all/i });
-      await expect(allTab).toHaveAttribute("aria-selected", "true");
+      const allTab = tablist.getByRole("button", { name: /^all/i });
+      await expect(allTab).toHaveAttribute("aria-pressed", "true");
     }
   });
 
@@ -103,7 +107,7 @@ test.describe("Projects Showcase & Case Study System", () => {
   });
 
   // Scenario 4 & 5: Open project detail page / verify content & back navigation
-  test("Scenario 4 & 5: Project navigation and return back to directory", async ({
+  test("Scenario 4 & 5: Project navigation and return back to directory and main", async ({
     page,
   }) => {
     // Navigate to a non-existent slug which safely exercises the Project 404 view
@@ -119,8 +123,14 @@ test.describe("Projects Showcase & Case Study System", () => {
 
     await expect(page).toHaveURL(/\/projects$/);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Engineering Projects" })
+      page.getByRole("heading", { level: 1, name: "Engineering Projects", exact: true })
     ).toBeVisible();
+
+    // Verify Back to Main option returns to homepage with 4 featured projects
+    await page.getByRole("link", { name: "Back to Main" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    const projectsSection = page.getByRole("region", { name: "Projects", exact: true });
+    await expect(projectsSection.getByRole("article")).toHaveCount(4);
   });
 
   // Scenario 6: Responsive layout across viewports (320px to 1440px)
@@ -139,7 +149,7 @@ test.describe("Projects Showcase & Case Study System", () => {
 
       // Verify header is visible
       await expect(
-        page.getByRole("heading", { level: 1, name: "Engineering Projects" })
+        page.getByRole("heading", { level: 1, name: "Engineering Projects", exact: true })
       ).toBeVisible();
 
       // Verify search input is interactive

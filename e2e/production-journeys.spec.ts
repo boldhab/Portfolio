@@ -2,66 +2,88 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Phase 5: Production User Journeys & Reliability", () => {
   // Journey A — Homepage Exploration
-  test("Journey A: Homepage sections render and navigate to Projects", async ({ page }) => {
+  test("Journey A: Homepage sections render and navigate to Projects", async ({
+    page,
+  }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Habtamu Befekadu/);
 
     const main = page.getByRole("main");
     // Verify all primary sections
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(main.getByRole("heading", { name: "Featured Projects" })).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: "Engineering Projects", exact: true })
+    ).toBeVisible();
     await expect(main.getByRole("heading", { name: "About Me" })).toBeVisible();
-    await expect(main.getByRole("heading", { name: "Let’s work together." })).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: "Contact", exact: true })
+    ).toBeVisible();
 
     // Click View Projects CTA
     const viewProjectsBtn = main.getByRole("link", { name: "View Projects" });
     await viewProjectsBtn.click();
     await expect(page).toHaveURL(/\/projects$/);
-    await expect(page.getByRole("heading", { level: 1, name: /Projects/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Engineering Projects", exact: true })
+    ).toBeVisible();
   });
 
   // Journey B — Projects & Case Studies
-  test("Journey B: Projects gallery search, filtering, and navigation", async ({ page }) => {
-    await page.goto("/projects");
-    await expect(page).toHaveTitle(/Projects/);
+  test("Journey B: Projects gallery search, filtering, and navigation", async ({
+    page,
+  }) => {
+    await page.goto("/projects?q=Architecture");
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === "/projects" && url.searchParams.get("q") === "Architecture"
+    );
 
     const searchInput = page.getByRole("textbox", { name: "Search projects" });
-    await expect(searchInput).toBeVisible();
+    await expect(searchInput).toHaveValue("Architecture");
 
     // Test search filter input
-    await searchInput.fill("Architecture");
-    await expect(searchInput).toHaveValue("Architecture");
+    await searchInput.fill("backend");
+    await expect(searchInput).toHaveValue("backend");
 
     // Clear search
     await searchInput.fill("");
     await expect(searchInput).toHaveValue("");
 
-    // Back to home via brand logo
-    const brandLogo = page.getByLabel(/Habtamu Befekadu Home/i);
-    await brandLogo.click();
+    // Back to main via Back to Main button
+    await page.getByRole("link", { name: "Back to Main" }).click();
     await expect(page).toHaveURL(/\/$/);
   });
 
   // Journey C — About and Experience
-  test("Journey C: About narrative, experience timeline, and resume behavior", async ({ page }) => {
+  test("Journey C: About narrative, experience timeline, and resume behavior", async ({
+    page,
+  }) => {
     await page.goto("/about");
-    await expect(page).toHaveTitle(/About/);
+    await expect(page).toHaveURL(/\/#about$/);
 
     const main = page.getByRole("main");
-    await expect(main.getByRole("heading", { level: 1, name: "Habtamu Befekadu" })).toBeVisible();
-    await expect(main.getByRole("heading", { name: "Biography & Engineering Background" })).toBeVisible();
-    await expect(main.getByRole("heading", { name: "Curriculum Vitae & Résumé" })).toBeVisible();
+    await expect(main.getByRole("heading", { level: 2, name: "About Me" })).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: "Biography & Engineering Background" })
+    ).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: "Curriculum Vitae & Résumé" })
+    ).toBeVisible();
 
     // Navigate to Experience page
     await page.goto("/experience");
-    await expect(page).toHaveTitle(/Experience/);
-    await expect(page.getByRole("main").getByRole("heading", { level: 1, name: "Work Experience" })).toBeVisible();
+    await expect(page).toHaveURL(/\/#experience$/);
+    await expect(
+      page.getByRole("main").getByRole("heading", { level: 2, name: "Work Experience" })
+    ).toBeVisible();
   });
 
   // Journey D — Contact Form Full Transmission Lifecycle
-  test("Journey D: Contact validation, mock delivery success, and failure fallback", async ({ page }) => {
+  test("Journey D: Contact validation, mock delivery success, and failure fallback", async ({
+    page,
+  }) => {
     await page.goto("/contact");
-    await expect(page).toHaveTitle(/Contact/);
+    await expect(page).toHaveURL(/\/#contact$/);
 
     const nameInput = page.getByLabel(/your name/i);
     const emailInput = page.getByLabel(/email address/i);
@@ -81,18 +103,20 @@ test.describe("Phase 5: Production User Journeys & Reliability", () => {
         contentType: "application/json",
         body: JSON.stringify({
           success: true,
-          message: "Your message has been delivered successfully. Thank you for reaching out!",
+          message: "Your message was accepted for delivery. Thank you for reaching out!",
         }),
       });
     });
 
     await nameInput.fill("Alex Morgan");
     await emailInput.fill("alex@enterprise.dev");
-    await messageInput.fill("Inquiring about distributed backend engineering consultation.");
+    await messageInput.fill(
+      "Inquiring about distributed backend engineering consultation."
+    );
     await submitBtn.click();
 
-    await expect(page.getByText(/message delivered/i)).toBeVisible();
-    await expect(page.getByText(/your message has been delivered successfully/i)).toBeVisible();
+    await expect(page.getByText(/message submitted/i)).toBeVisible();
+    await expect(page.getByText(/your message was accepted for delivery/i)).toBeVisible();
     // Verify inputs reset
     await expect(nameInput).toHaveValue("");
     await expect(emailInput).toHaveValue("");
@@ -106,7 +130,8 @@ test.describe("Phase 5: Production User Journeys & Reliability", () => {
         contentType: "application/json",
         body: JSON.stringify({
           success: false,
-          message: "The contact messaging service is currently offline. Please reach out via direct social links.",
+          message:
+            "The contact messaging service is currently offline. Please reach out via direct social links.",
         }),
       });
     });
@@ -121,17 +146,24 @@ test.describe("Phase 5: Production User Journeys & Reliability", () => {
     // Inputs must be preserved
     await expect(nameInput).toHaveValue("Alex Morgan");
     await expect(emailInput).toHaveValue("alex@enterprise.dev");
-    await expect(messageInput).toHaveValue("Retrying message transmission after temporary error.");
+    await expect(messageInput).toHaveValue(
+      "Retrying message transmission after temporary error."
+    );
   });
 
   // Journey E — Theme Switching and Persistence
-  test("Journey E: Theme switches and persists across navigation and reload", async ({ page }) => {
+  test("Journey E: Theme switches and persists across navigation and reload", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
 
     // Verify initial light theme
-    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(page.locator("body")).toHaveCSS(
+      "background-color",
+      "rgb(255, 255, 255)"
+    );
 
     // Switch to dark theme
     const themeBtn = page.getByRole("button", { name: /switch to dark theme/i });
@@ -140,7 +172,7 @@ test.describe("Phase 5: Production User Journeys & Reliability", () => {
 
     // Navigate to another page (/about)
     await page.getByRole("link", { name: "About" }).first().click();
-    await expect(page).toHaveURL(/\/about$/);
+    await expect(page).toHaveURL(/\/#about$/);
 
     // Theme should still be dark
     await expect(page.locator("body")).toHaveCSS("background-color", "rgb(0, 0, 0)");
@@ -151,7 +183,9 @@ test.describe("Phase 5: Production User Journeys & Reliability", () => {
   });
 
   // Journey F — Mobile Experience at 375px
-  test("Journey F: Mobile navigation, viewport containment, and drawer interaction", async ({ page }) => {
+  test("Journey F: Mobile navigation, viewport containment, and drawer interaction", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/");
 
@@ -171,7 +205,7 @@ test.describe("Phase 5: Production User Journeys & Reliability", () => {
 
     // Navigate to Projects via mobile menu
     await mobileMenu.getByRole("link", { name: "Projects" }).click();
-    await expect(page).toHaveURL(/\/projects$/);
+    await expect(page).toHaveURL(/\/#projects$/);
     await expect(mobileMenu).toBeHidden();
   });
 
