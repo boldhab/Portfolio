@@ -4,21 +4,38 @@
 
 import { profileData } from "@/data/profile";
 
-function getSiteUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "");
+function getSiteOrigin(value?: string): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return;
+  const url = new URL(trimmed);
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error("The site URL must be an HTTP(S) origin.");
   }
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL.replace(/\/+$/, "")}`;
-  }
-  if (process.env.NODE_ENV === "production") {
-    return "https://boldhab.pro.et";
-  }
-  return "http://localhost:3000";
+  return url.origin;
 }
+
+const configuredOrigin = getSiteOrigin(
+  process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL
+);
+const vercelEnvironment = process.env.VERCEL_ENV;
+const rawVercelUrl = process.env.VERCEL_URL?.trim();
+const vercelOrigin = rawVercelUrl
+  ? getSiteOrigin(
+      rawVercelUrl.startsWith("https://") ? rawVercelUrl : `https://${rawVercelUrl}`
+    )
+  : undefined;
+const canonicalOrigin =
+  ((!vercelEnvironment || vercelEnvironment === "production") &&
+    configuredOrigin?.startsWith("https://") &&
+    configuredOrigin) ||
+  undefined;
 
 export const SITE_CONFIG = {
   name: "Habtamu Befekadu",
@@ -26,8 +43,9 @@ export const SITE_CONFIG = {
   title: `${profileData.name} | ${profileData.title}`,
   description:
     "Portfolio of Habtamu Befekadu, a Full-Stack Developer focused on backend engineering, web development, and mobile development.",
-  url: getSiteUrl(),
-  ogImage: "/images/og-image.png",
+  url: canonicalOrigin || vercelOrigin || configuredOrigin || "http://localhost:3000",
+  canonicalOrigin,
+  ogImage: "/social-image",
   author: {
     name: "Habtamu Befekadu",
     role: "Full-Stack Developer",
