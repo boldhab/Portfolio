@@ -40,10 +40,12 @@ export default defineConfig({
       use: { ...devices["iPhone 12"] },
     },
   ],
-  webServer: {
-    command: `npx next dev -p ${PORT}`,
-    url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
+    ? undefined
+    : {
+        command: `npx next dev -p ${PORT}`,
+        url: BASE_URL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120000,
+      },
 });

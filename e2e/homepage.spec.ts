@@ -16,10 +16,12 @@ for (const width of [320, 375, 768, 1024, 1440]) {
     await page.goto("/");
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(main.getByRole("heading", { name: "Featured Projects" })).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: "Engineering Projects", exact: true })
+    ).toBeVisible();
     await expect(main.getByRole("heading", { name: "About Me" })).toBeVisible();
     await expect(
-      main.getByRole("heading", { name: "Let’s work together." })
+      main.getByRole("heading", { name: "Contact", exact: true })
     ).toBeVisible();
     const fits = await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth
@@ -29,7 +31,9 @@ for (const width of [320, 375, 768, 1024, 1440]) {
     expect((await projects.boundingBox())?.height).toBeGreaterThanOrEqual(44);
     await projects.click();
     await expect(page).toHaveURL(/\/projects$/);
-    await expect(page.getByRole("heading", { level: 1, name: /Projects/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Engineering Projects", exact: true })
+    ).toBeVisible();
     expect(errors).toEqual([]);
   });
 }
@@ -39,9 +43,6 @@ test("theme changes retain inversion and pass the axe audit", async ({ page }) =
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
   await page.goto("/");
   await page.addScriptTag({ path: axeScript });
-  const cta = page
-    .getByRole("heading", { name: "Let’s work together." })
-    .locator("xpath=ancestor::section");
   const audit = async () => {
     const violations = await page.evaluate(async () => {
       const axe = (window as unknown as { axe: typeof import("axe-core") }).axe;
@@ -57,11 +58,9 @@ test("theme changes retain inversion and pass the axe audit", async ({ page }) =
   };
 
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(255, 255, 255)");
-  await expect(cta).toHaveCSS("background-color", "rgb(0, 0, 0)");
   await audit();
   await page.getByRole("button", { name: "Switch to dark theme" }).click();
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(0, 0, 0)");
-  await expect(cta).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await audit();
 });
 
@@ -82,14 +81,46 @@ test("mobile menu supports keyboard navigation and escape", async ({ page }) => 
   await expect(toggle).toBeFocused();
   await page.keyboard.press("Enter");
   await menu.getByRole("link", { name: "About" }).click();
-  await expect(page).toHaveURL(/\/about$/);
+  await expect(page).toHaveURL(/\/#about$/);
   await expect(menu).toBeHidden();
   const response = await page.goto("/experience");
   expect(response?.ok()).toBe(true);
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeVisible();
 
   await page.goto("/");
-  await page.getByRole("link", { name: "Get in Touch" }).click();
-  await expect(page).toHaveURL(/\/contact$/);
-  await expect(page.getByRole("heading", { name: "Contact", level: 1 })).toBeVisible();
+  await page.getByRole("link", { name: "Contact Me" }).click();
+  await expect(page).toHaveURL(/\/#contact$/);
+  await expect(
+    page.getByRole("heading", { name: "Contact", exact: true, level: 2 })
+  ).toBeVisible();
+});
+
+test("homepage sections follow the menu order and featured projects open the full list", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const sections = await page
+    .locator("main > div > section[id]")
+    .evaluateAll((elements) => elements.map(({ id }) => id));
+  expect(sections).toEqual(["experience", "technology", "projects", "about", "contact"]);
+  const menu = page.getByRole("navigation", { name: "Main Navigation" });
+  await expect(menu.getByRole("link")).toHaveText([
+    "Home",
+    "Experience",
+    "Technology",
+    "Projects",
+    "About",
+    "Contact",
+  ]);
+
+  const projects = page.getByRole("region", { name: "Projects", exact: true });
+  await expect(projects.getByRole("article")).toHaveCount(4);
+  await expect(projects.getByRole("textbox", { name: "Search projects" })).toHaveCount(0);
+  await projects.getByRole("link", { name: "View all projects" }).click();
+  await expect(page).toHaveURL(/\/projects$/);
+  await expect(page.getByRole("textbox", { name: "Search projects" })).toBeVisible();
+  await expect.poll(() => page.getByRole("article").count()).toBeGreaterThan(4);
+  await page.getByRole("link", { name: "Back to Main" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(projects.getByRole("article")).toHaveCount(4);
 });

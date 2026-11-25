@@ -18,11 +18,11 @@ test.describe("Phase 4: Personal Pages & Contact System", () => {
     });
 
     await page.goto("/about");
-    await expect(page).toHaveTitle(/About/);
+    await expect(page).toHaveURL(/\/#about$/);
 
     const main = page.getByRole("main");
     await expect(
-      main.getByRole("heading", { level: 1, name: "Habtamu Befekadu" })
+      main.getByRole("heading", { level: 2, name: "About Me" })
     ).toBeVisible();
 
     // Verify biography section
@@ -56,11 +56,11 @@ test.describe("Phase 4: Personal Pages & Contact System", () => {
     page,
   }) => {
     await page.goto("/experience");
-    await expect(page).toHaveTitle(/Experience/);
+    await expect(page).toHaveURL(/\/#experience$/);
 
     const main = page.getByRole("main");
     await expect(
-      main.getByRole("heading", { level: 1, name: "Work Experience" })
+      main.getByRole("heading", { level: 2, name: "Work Experience" })
     ).toBeVisible();
 
     // Run axe accessibility audit
@@ -83,11 +83,11 @@ test.describe("Phase 4: Personal Pages & Contact System", () => {
     page,
   }) => {
     await page.goto("/contact");
-    await expect(page).toHaveTitle(/Contact/);
+    await expect(page).toHaveURL(/\/#contact$/);
 
     const main = page.getByRole("main");
     await expect(
-      main.getByRole("heading", { level: 1, name: "Contact & Inquiries" })
+      main.getByRole("heading", { level: 2, name: "Contact & Inquiries" })
     ).toBeVisible();
     await expect(
       main.getByRole("heading", { name: "Let’s discuss your next project." })
