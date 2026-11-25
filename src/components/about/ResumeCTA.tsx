@@ -82,7 +82,7 @@ export function ResumeCTA({
             size="sm"
             className="shrink-0 gap-1.5 font-mono text-xs"
           >
-            <Link href="/contact">
+            <Link href="/#contact">
               <Mail className="h-3.5 w-3.5" />
               <span>Request CV</span>
             </Link>
